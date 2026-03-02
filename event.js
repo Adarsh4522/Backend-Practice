@@ -19,3 +19,4 @@ eventEmitter.emit('task1');
 setTimeout(function() {
     eventEmitter.emit('task2');
 },3000);
+
