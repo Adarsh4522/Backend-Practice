@@ -16,7 +16,7 @@ app.listen(3000, ()=> {
 
 //Types of middlewares
 
-//1. Application level middleware. eg.: aap.method , app.use, etc.
+//1. Application level middleware. eg.: app.method , app.use, etc.
 //2. Router level middleware. eg.: express.router - it provides modular routing
 //3. Built-in middleware. eg.: express.json() - to parse json data, express.urlencoded()- use to pass form data, 
 //   express.static()
