@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,14 @@
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
     "ws": "^8.20.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adarsh4522/Backend-Practice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Adarsh4522/Backend-Practice/issues"
+  },
+  "homepage": "https://github.com/Adarsh4522/Backend-Practice#readme"
 }
