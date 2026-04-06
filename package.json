@@ -18,9 +18,9 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
     "ws": "^8.20.0"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Adarsh4522/Backend-Practice.git"
