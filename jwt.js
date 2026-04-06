@@ -1,5 +1,5 @@
 const express = require('express');
-const jwt = require('jsonwebtocken');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
@@ -29,4 +29,8 @@ app.get('/home', (req,res)=> {
         res.send('Welcome to the home page!');
     });
 
+});
+
+app.listen(3000, ()=> {
+    console.log('Server is running on port 3000');
 });
