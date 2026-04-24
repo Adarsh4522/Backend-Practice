@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Notes</title>
+    <style>
+      :root {
+        --bg-1: #fef3c7;
+        --bg-2: #bae6fd;
+        --bg-3: #ecfccb;
+        --paper: #fffcf5;
+        --ink: #102a43;
+        --muted: #486581;
+        --line: #d9e2ec;
+        --accent: #ef4444;
+        --accent-2: #f59e0b;
+        --ok: #059669;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 14% 18%, var(--bg-1), transparent 36%),
+          radial-gradient(circle at 86% 22%, var(--bg-2), transparent 34%),
+          radial-gradient(circle at 52% 86%, var(--bg-3), transparent 30%),
+          linear-gradient(160deg, #fff9ed 0%, #f7fbff 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 22px;
+      }
+
+      .card {
+        width: min(920px, 100%);
+        background: linear-gradient(180deg, #fffdf7 0%, var(--paper) 100%);
+        border: 1px solid rgba(217, 226, 236, 0.9);
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow:
+          0 24px 44px rgba(16, 42, 67, 0.15),
+          0 2px 0 rgba(255, 255, 255, 0.7) inset;
+        transform: translateY(8px);
+        opacity: 0;
+        animation: slide-in 520ms ease forwards;
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+
+      .title-group h1 {
+        margin: 0;
+        letter-spacing: 0.4px;
+        font-size: clamp(1.4rem, 3.8vw, 2.2rem);
+      }
+
+      .title-group p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      .pill {
+        background: linear-gradient(135deg, #fee2e2, #ffedd5);
+        color: #7c2d12;
+        border: 1px solid #fecaca;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .editor-wrap {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(180deg, #f8fafc, #eef2f7);
+      }
+
+      .toolbar span {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 310px;
+        resize: vertical;
+        border: 0;
+        padding: 16px;
+        font: inherit;
+        line-height: 1.65;
+        color: #1f2937;
+        background: transparent;
+        outline: none;
+      }
+
+      textarea:focus {
+        box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.35);
+      }
+
+      #status {
+        margin-top: 12px;
+        min-height: 22px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        transition: color 200ms ease;
+      }
+
+      #status.saving {
+        color: var(--accent-2);
+      }
+
+      #status.saved {
+        color: var(--ok);
+      }
+
+      #status.error {
+        color: var(--accent);
+      }
+
+      @keyframes slide-in {
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .card {
+          border-radius: 16px;
+          padding: 14px;
+        }
+
+        textarea {
+          min-height: 260px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <section class="top">
+        <div class="title-group">
+          <h1>Live Notes</h1>
+          <p>Type naturally. Your text is auto-saved in MongoDB.</p>
+        </div>
+        <div class="pill">Auto-save active</div>
+      </section>
+
+      <section class="editor-wrap">
+        <div class="toolbar">
+          <span>Workspace</span>
+          <span id="charCount">0 characters</span>
+        </div>
+        <textarea id="editor" placeholder="Start writing your ideas..."></textarea>
+      </section>
+
+      <div id="status">Loading saved text...</div>
+    </main>
+
+    <script>
+      const editor = document.getElementById("editor");
+      const statusBox = document.getElementById("status");
+      const charCount = document.getElementById("charCount");
+      let saveTimer;
+
+      function setStatus(text, type = "") {
+        statusBox.textContent = text;
+        statusBox.className = type;
+      }
+
+      function updateCharCount() {
+        const count = editor.value.length;
+        charCount.textContent = `${count} characters`;
+      }
+
+      async function loadContent() {
+        try {
+          const response = await fetch("/api/content");
+          const data = await response.json();
+          editor.value = data.text || "";
+          updateCharCount();
+          setStatus("Loaded from MongoDB", "saved");
+        } catch (error) {
+          setStatus("Could not load saved text", "error");
+        }
+      }
+
+      async function saveContent() {
+        try {
+          await fetch("/api/content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: editor.value }),
+          });
+
+          const now = new Date().toLocaleTimeString();
+          setStatus(`Saved at ${now}`, "saved");
+        } catch (error) {
+          setStatus("Save failed. Check backend or MongoDB.", "error");
+        }
+      }
+
+      editor.addEventListener("input", () => {
+        updateCharCount();
+        setStatus("Saving...", "saving");
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveContent, 500);
+      });
+
+      loadContent();
+    </script>
+  </body>
+</html>

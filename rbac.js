@@ -32,3 +32,7 @@ const checkAccess = (page)=> (req, res, next) => {
         res.send('Access denied');
     }
 }
+
+// Security headers are HTTP response headers sent by a server to a browser that define security policies,
+// restricting browser behavior to protect against client-side vulnerabilities like XSS, clickjacking, and code injection.
+// They enhance web security by controlling browser actions, such as enforcing HTTPS and restricting content sources.
